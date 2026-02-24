@@ -1,0 +1,13 @@
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\AspNet.Tx.Board.GeneratedMSBuildEditorConfig.editorconfig
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\AspNet.Tx.Board.AssemblyInfoInputs.cache
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\AspNet.Tx.Board.AssemblyInfo.cs
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\AspNet.Tx.Board.csproj.CoreCompileInputs.cache
+C:\ASP.NET TX Board\AspNet.Tx.Board\bin\Debug\net10.0\AspNet.Tx.Board.deps.json
+C:\ASP.NET TX Board\AspNet.Tx.Board\bin\Debug\net10.0\AspNet.Tx.Board.dll
+C:\ASP.NET TX Board\AspNet.Tx.Board\bin\Debug\net10.0\AspNet.Tx.Board.pdb
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\AspNet.Tx.Board.dll
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\refint\AspNet.Tx.Board.dll
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\AspNet.Tx.Board.pdb
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\ref\AspNet.Tx.Board.dll
+C:\ASP.NET TX Board\AspNet.Tx.Board\bin\Debug\net10.0\AspNet.Tx.Board.xml
+C:\ASP.NET TX Board\AspNet.Tx.Board\obj\Debug\net10.0\AspNet.Tx.Board.xml

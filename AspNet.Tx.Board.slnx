@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AspNet.Tx.Board.Tests/AspNet.Tx.Board.Tests.csproj" />
+  <Project Path="AspNet.Tx.Board/AspNet.Tx.Board.csproj" />
+</Solution>

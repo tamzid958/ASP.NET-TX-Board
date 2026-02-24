@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>AspNet.Tx.Board</id>
+    <version>0.1.0</version>
+    <authors>Tamzid</authors>
+    <license type="file">LICENSE.txt</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <readme>README.md</readme>
+    <projectUrl>https://github.com/tamzid/aspnet-tx-board</projectUrl>
+    <description>Transaction monitoring and diagnostics dashboard for ASP.NET Core applications.</description>
+    <tags>aspnetcore transactions monitoring diagnostics middleware logging</tags>
+    <repository type="git" url="https://github.com/tamzid/aspnet-tx-board" />
+    <dependencies>
+      <group targetFramework="net10.0" />
+    </dependencies>
+    <frameworkReferences>
+      <group targetFramework="net10.0">
+        <frameworkReference name="Microsoft.AspNetCore.App" />
+      </group>
+    </frameworkReferences>
+  </metadata>
+  <files>
+    <file src="C:\ASP.NET TX Board\AspNet.Tx.Board\bin\Release\net10.0\AspNet.Tx.Board.dll" target="lib\net10.0\AspNet.Tx.Board.dll" />
+    <file src="C:\ASP.NET TX Board\AspNet.Tx.Board\bin\Release\net10.0\AspNet.Tx.Board.xml" target="lib\net10.0\AspNet.Tx.Board.xml" />
+    <file src="C:\ASP.NET TX Board\AspNet.Tx.Board\README.md" target="\README.md" />
+    <file src="C:\ASP.NET TX Board\AspNet.Tx.Board\LICENSE.txt" target="\LICENSE.txt" />
+  </files>
+</package>
