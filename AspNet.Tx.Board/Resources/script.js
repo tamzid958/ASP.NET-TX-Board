@@ -35,8 +35,8 @@ $(document).ready(() => {
     // Extract the current full pathname
     const pathname = window.location.pathname;
 
-    // Find the context path by trimming '/tx-board/ui/index.html'
-    const CONTEXT_PATH = pathname.replace(//tx-board/ui(/index.html)?$/, "")
+    // Find the context path by trimming '/tx-board/ui' or '/tx-board/ui/index.html'
+    const CONTEXT_PATH = pathname.replace(/\/tx-board\/ui(?:\/index\.html)?\/?$/, "")
     const API_BASE_URL = CONTEXT_PATH + '/api/tx-board'
     const ENDPOINTS = {
         ALARMING_THRESHOLD: API_BASE_URL + '/config/alarming-threshold',
