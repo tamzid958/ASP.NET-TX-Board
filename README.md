@@ -101,7 +101,7 @@ Note: `Storage: Redis` currently falls back to in-memory storage with a warning 
 - `GET /tx-board/api/distribution`
 - `GET /tx-board/api/export`
 
-### Spring TX Board-Compatible APIs
+### ASP.NET TX Board-Compatible APIs
 
 - `GET /api/tx-board/config/alarming-threshold`
 - `GET /api/tx-board/tx-summary`
