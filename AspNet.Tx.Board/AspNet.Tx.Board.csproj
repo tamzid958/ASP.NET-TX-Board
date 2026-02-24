@@ -9,14 +9,14 @@
     <IsPackable>true</IsPackable>
 
     <PackageId>AspNet.Tx.Board</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>Tamzid</Authors>
     <Company>SDLC.PRO</Company>
     <Description>Transaction monitoring and diagnostics dashboard for ASP.NET Core applications.</Description>
     <PackageReleaseNotes>Inspired by spring-tx-board: https://github.com/Mamun-Al-Babu-Shikder/spring-tx-board</PackageReleaseNotes>
     <PackageTags>aspnetcore;transactions;monitoring;diagnostics;middleware;logging</PackageTags>
-    <PackageProjectUrl>https://github.com/tamzid/aspnet-tx-board</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/tamzid/aspnet-tx-board</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/tamzid958/ASP.NET-TX-Board</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/tamzid958/ASP.NET-TX-Board</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
