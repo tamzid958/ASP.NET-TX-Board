@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using AspNet.Tx.Board.Core;
 using AspNet.Tx.Board.Models;
 using AspNet.Tx.Board.Options;
 using AspNet.Tx.Board.Services;
@@ -16,7 +17,7 @@ public sealed class TxBoardMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, ITxBoardRecorder recorder, IOptionsMonitor<TxBoardOptions> options)
+    public async Task InvokeAsync(HttpContext context, ITxBoardRecorder recorder, IOptionsMonitor<TxBoardOptions> options, TxBoardListener listener)
     {
         var currentOptions = options.CurrentValue;
 
@@ -25,6 +26,11 @@ public sealed class TxBoardMiddleware
             await _next(context);
             return;
         }
+
+        // Initialize a fresh TransactionContext for this request. Because TransactionContext
+        // is a reference type, AsyncLocal flows the same reference to all child async
+        // continuations (EF Core interceptors), so mutations are visible everywhere.
+        listener.InitializeRequestContext();
 
         var startedAt = DateTimeOffset.UtcNow;
         var stopwatch = Stopwatch.StartNew();

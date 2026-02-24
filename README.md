@@ -1,67 +1,67 @@
-# ASP.NET Tx Board – Installation & Usage Instructions
+# ASP.NET Tx Board
 
-**ASP.NET Tx Board** is an intelligent, auto-configurable transaction monitoring and diagnostics package for ASP.NET Core applications. It provides deep visibility into transactional behavior — capturing execution time, nested transactions, executed SQL queries, connection usage, and post-transaction activity.
+ASP.NET Tx Board is a transaction monitoring and diagnostics package for ASP.NET Core applications. It captures HTTP request timing, database transaction behavior, SQL execution metadata, and provides a built-in dashboard/API for analysis.
 
-This document explains how to install, configure, and use the package in an ASP.NET Core project.
+Inspired by `spring-tx-board`:
+https://github.com/Mamun-Al-Babu-Shikder/spring-tx-board
 
----
+## Requirements
 
-## 1. Prerequisites
+- .NET 10 SDK/runtime
+- ASP.NET Core application
+- Entity Framework Core (recommended, for transaction and SQL tracking)
 
-* .NET 6.0 or later
-* ASP.NET Core Web API / MVC application
-* Entity Framework Core (recommended for database transaction tracking)
-
----
-
-## 2. Install the Package
-
-Install the NuGet package:
-
-### Using .NET CLI
+## Install
 
 ```bash
 dotnet add package AspNet.Tx.Board
 ```
 
-### Using Package Manager Console
+## Quick Start
 
-```powershell
-Install-Package AspNet.Tx.Board
-```
-
----
-
-## 3. Register the Service
-
-In `Program.cs` (for .NET 6+ minimal hosting model):
+In `Program.cs`:
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
+using AspNet.Tx.Board.Extensions;
 
-// Add Tx Board
+var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTxBoard(builder.Configuration);
 
 var app = builder.Build();
 
-// Enable middleware
 app.UseTxBoard();
-
 app.Run();
 ```
 
----
+## EF Core Interceptors (Important)
 
-## 4. Configuration
+For database transaction and SQL visibility, add Tx Board interceptors to your `DbContext` options:
 
-Add configuration to `appsettings.json`:
+```csharp
+using AspNet.Tx.Board.Interceptors;
+
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+{
+    options.UseSqlite("Data Source=app.db");
+
+    options.AddInterceptors(
+        sp.GetRequiredService<TxBoardTransactionInterceptor>(),
+        sp.GetRequiredService<TxBoardCommandInterceptor>(),
+        sp.GetRequiredService<TxBoardConnectionInterceptor>()
+    );
+});
+```
+
+## Configuration
+
+`appsettings.json`:
 
 ```json
 {
   "TxBoard": {
     "Enabled": true,
-    "LogType": "Simple", // Simple | Details
-    "Storage": "InMemory", // InMemory | Redis
+    "LogType": "Simple",
+    "Storage": "InMemory",
     "AlarmingThreshold": {
       "Transaction": 1000,
       "Connection": 1000
@@ -74,190 +74,57 @@ Add configuration to `appsettings.json`:
 }
 ```
 
-### Configuration Options
+### Options
 
-| Property                        | Description                                     |
-| ------------------------------- | ----------------------------------------------- |
-| `Enabled`                       | Enables or disables Tx Board                    |
-| `LogType`                       | Logging format: `Simple` or `Details`           |
-| `Storage`                       | Storage type: `InMemory` or `Redis`             |
-| `AlarmingThreshold.Transaction` | Highlight transactions exceeding duration (ms)  |
-| `AlarmingThreshold.Connection`  | Highlight connections exceeding lease time (ms) |
-| `DurationBuckets`               | Buckets for duration distribution               |
-| `Redis.EntityTtl`               | Log retention time in Redis                     |
+| Key | Description | Default |
+| --- | --- | --- |
+| `Enabled` | Enables/disables Tx Board capture | `true` |
+| `LogType` | `Simple` or `Details` logging format | `Simple` |
+| `Storage` | `InMemory` or `Redis` | `InMemory` |
+| `AlarmingThreshold.Transaction` | Warn threshold for transaction duration (ms) | `1000` |
+| `AlarmingThreshold.Connection` | Warn threshold for connection occupied time (ms) | `1000` |
+| `DurationBuckets` | Duration histogram buckets (ms) | `[100,500,1000,2000,5000]` |
+| `Redis.EntityTtl` | Retention TTL for Redis mode | `7 days` |
 
----
+Note: `Storage: Redis` currently falls back to in-memory storage with a warning log.
 
-## 5. Web UI
+## Endpoints
 
-If your application includes MVC or minimal APIs, the built-in dashboard is available at:
+### Dashboard and HTTP Metrics
 
-```
-http://localhost:5000/tx-board/ui
-```
+- `GET /tx-board/ui`
+- `GET /tx-board/api/transactions`
+- `GET /tx-board/api/distribution`
+- `GET /tx-board/api/export`
 
-The dashboard provides:
+### Spring TX Board-Compatible APIs
 
-* Real-time transaction monitoring
-* Filtering and sorting
-* Pagination
-* Duration distribution
-* CSV export
+- `GET /api/tx-board/config/alarming-threshold`
+- `GET /api/tx-board/tx-summary`
+- `GET /api/tx-board/tx-charts`
+- `GET /api/tx-board/tx-logs`
+- `GET /api/tx-board/sql-logs`
 
----
+## Logging
 
-## 6. Logging Modes
+- `Simple` mode:
+  - Info for healthy transactions
+  - Warning for alarming transactions or connection usage
+- `Details` mode:
+  - Structured multi-line transaction/sql diagnostics
 
-Tx Board emits logs when transactions complete.
+## Demo
 
-### Simple Mode (default)
+A runnable demo is included at `demo/DotNetTxBoard.Demo`.
 
-Healthy transaction (INFO):
-
-```
-Transaction [OrderService.PlaceOrder] took 152 ms, Status: Committed
-```
-
-Unhealthy transaction (WARN):
-
-```
-Transaction [OrderService.PlaceOrder] took 2150 ms, Status: Committed, Connections: 3, Queries: 12
+```bash
+dotnet run --project demo/DotNetTxBoard.Demo
 ```
 
----
+Then open:
 
-### Details Mode
+- `http://localhost:5000/tx-board/ui` (or your configured port)
 
-Healthy (INFO):
+## Maintainer
 
-```
-[Tx-Board] Transaction Completed:
-  • ID: 4bfd0935-2de3-4992-96da-1992431d48c1
-  • Method: OrderService.PlaceOrder
-  • Isolation Level: ReadCommitted
-  • Status: Committed
-  • Started At: 2026-02-24T10:15:30Z
-  • Ended At: 2026-02-24T10:15:30Z
-  • Duration: 152 ms
-  • Connections Acquired: 2
-  • Executed Query Count: 5
-```
-
-Unhealthy transactions log at `Warning` level.
-
----
-
-## 7. Using Transactions
-
-Tx Board automatically hooks into:
-
-* `TransactionScope`
-* EF Core `DbContext` transactions
-* `IDbContextTransaction`
-* Middleware-based request pipeline tracking
-
-### Example Using EF Core
-
-```csharp
-public class OrderService
-{
-    private readonly AppDbContext _context;
-
-    public OrderService(AppDbContext context)
-    {
-        _context = context;
-    }
-
-    public async Task PlaceOrderAsync()
-    {
-        using var transaction = await _context.Database.BeginTransactionAsync();
-
-        // Business logic
-        await _context.SaveChangesAsync();
-
-        await transaction.CommitAsync();
-    }
-}
-```
-
-No additional attributes or manual instrumentation required.
-
----
-
-## 8. Storage Options
-
-### InMemory (Default)
-
-* Thread-safe in-memory collection
-* Suitable for single-instance applications
-
-### Redis
-
-* Distributed log storage
-* Suitable for multi-instance deployments
-* Supports configurable TTL
-
----
-
-## 9. Transaction-less SQL Logging
-
-Simple:
-
-```
-SQL executor leased connection for 2009 ms to execute 3 queries
-```
-
-Details:
-
-```
-[Tx-Board] SQL Execution Completed:
-  • ID: e127a497-f92d-4ef3-b686-23b7b0503aa7
-  • Connection Occupied Time: 2015 ms
-  • Executed Query Count: 1
-  • Executed Queries:
-    └── SELECT * FROM Employees WHERE Age >= 30;
-```
-
----
-
-## 10. Duration Distribution Utility
-
-Transactions are grouped into configurable ranges such as:
-
-* `0–100ms`
-* `100–500ms`
-* `500–1000ms`
-* `1000ms+`
-
-Used for performance analysis and dashboard visualization.
-
----
-
-## 11. Exporting Transactions
-
-Transactions can be exported in CSV format from:
-
-```
-/tx-board/api/export
-```
-
-Supports filtering and date-range selection.
-
----
-
-## 12. Future Enhancements
-
-* Kafka streaming support
-* ELK stack integration
-* Azure Application Insights integration
-* OpenTelemetry support
-
----
-
-## 13. Maintainer
-
-**ASP.NET Tx Board**
-Built and maintained by Tamzid
-Inspired by:
-- SDLC.PRO
-- https://github.com/Mamun-Al-Babu-Shikder/spring-tx-board
+Built and maintained by Tamzid.

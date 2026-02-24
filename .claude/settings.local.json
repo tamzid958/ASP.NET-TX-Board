@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet --version)",
+      "Bash(dotnet --list-sdks)",
+      "Bash(dotnet new sln -n DotNetTxBoard --force)",
+      "Bash(dotnet sln add src/DotNetTxBoard/DotNetTxBoard.csproj)",
+      "Bash(dotnet sln add demo/DotNetTxBoard.Demo/DotNetTxBoard.Demo.csproj)",
+      "Bash(dotnet build AspNet.Tx.Board/AspNet.Tx.Board.csproj)",
+      "Bash(dotnet list AspNet.Tx.Board/AspNet.Tx.Board.csproj package)",
+      "Bash(dotnet build AspNet.Tx.Board/AspNet.Tx.Board.csproj --verbosity detailed)",
+      "Bash(dotnet build demo/DotNetTxBoard.Demo/DotNetTxBoard.Demo.csproj)",
+      "Bash(dotnet build)",
+      "Bash(dotnet build AspNet.Tx.Board.slnx)",
+      "Bash(dotnet list demo/DotNetTxBoard.Demo/DotNetTxBoard.Demo.csproj package)",
+      "Bash(curl -sv -X POST http://localhost:5221/api/orders -H \"Content-Type: application/json\" -d '{\"\"customerName\"\":\"\"Alice\"\",\"\"amount\"\":99.99}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(__NEW_LINE_0b3f23310ca62966__ echo \"\")",
+      "Bash(curl -s \"http://localhost:5221/api/tx-board/tx-logs?page=0&size=10\")",
+      "Bash(__NEW_LINE_abc3e10b859e456d__ echo \"\")",
+      "Bash(curl -s \"http://localhost:5221/api/tx-board/sql-logs?page=0&size=5\")",
+      "Bash(curl -s http://localhost:5221/api/tx-board/tx-summary)",
+      "Bash(__NEW_LINE_28f3e5efb48f56c9__ echo \"\")",
+      "Bash(curl -s \"http://localhost:5221/api/tx-board/tx-logs?page=0&size=5\")",
+      "Bash(curl -s http://localhost:5221/api/tx-board/config/alarming-threshold)",
+      "Bash(__NEW_LINE_68983364c1c08d75__ echo \"\")",
+      "Bash(curl -s \"http://localhost:5221/api/tx-board/tx-logs?page=0&size=5&sort=startTime,desc\")",
+      "Bash(taskkill /PID 36812 /F)",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 36812 -Force -ErrorAction SilentlyContinue; Start-Sleep 2; Write-Host ''done''\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 1814 -Force -ErrorAction SilentlyContinue\")"
+    ]
+  }
+}
