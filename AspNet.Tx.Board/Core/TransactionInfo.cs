@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AspNet.Tx.Board.Enums;
 using AspNet.Tx.Board.Models;
 
@@ -31,4 +32,7 @@ internal sealed class TransactionInfo
     public int AlarmingConnectionCount { get; set; }
     public long TotalConnectionOccupiedMs { get; set; }
     public DateTimeOffset? LastConnectionAcquiredAt { get; set; }
+
+    // OpenTelemetry span for this transaction (null when no OTel listener is subscribed)
+    public Activity? Activity { get; set; }
 }

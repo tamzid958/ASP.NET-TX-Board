@@ -109,6 +109,47 @@ Note: `Storage: Redis` currently falls back to in-memory storage with a warning 
 - `GET /api/tx-board/tx-logs`
 - `GET /api/tx-board/sql-logs`
 
+## OpenTelemetry
+
+Tx Board emits traces and metrics via the standard .NET `System.Diagnostics` APIs — **no extra NuGet packages** are required in the library itself.
+
+### Traces
+
+A span named `db.transaction` is started for every database transaction and carries the following tags:
+
+| Tag | Example |
+| --- | --- |
+| `db.transaction.method` | `OrderService.PlaceOrder` |
+| `db.transaction.isolation_level` | `ReadCommitted` |
+| `db.transaction.propagation` | `Required` / `Nested` |
+| `db.transaction.status` | `Committed` / `RolledBack` / `Errored` |
+| `db.transaction.query_count` | `4` |
+| `db.transaction.alarming` | `false` |
+
+### Metrics
+
+| Metric | Unit | Tags |
+| --- | --- | --- |
+| `tx_board.transaction.duration` | ms | `db.transaction.method`, `db.transaction.status`, `db.transaction.propagation` |
+| `tx_board.connection.duration` | ms | `db.connection.alarming` |
+| `tx_board.request.duration` | ms | `http.method`, `http.route`, `http.status_code` |
+
+### Setup
+
+Install your preferred OTel exporter (e.g. `OpenTelemetry.Exporter.Console`, `OpenTelemetry.Exporter.OpenTelemetryProtocol`) and register the Tx Board source/meter:
+
+```csharp
+builder.Services.AddOpenTelemetry()
+    .WithTracing(t => t
+        .AddSource("AspNet.Tx.Board")
+        .AddConsoleExporter())
+    .WithMetrics(m => m
+        .AddMeter("AspNet.Tx.Board")
+        .AddConsoleExporter());
+```
+
+When no OTel listener is registered, all instrumentation is a no-op with zero overhead.
+
 ## Logging
 
 - `Simple` mode:

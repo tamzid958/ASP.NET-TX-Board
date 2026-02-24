@@ -3,6 +3,7 @@ using AspNet.Tx.Board.Core;
 using AspNet.Tx.Board.Models;
 using AspNet.Tx.Board.Options;
 using AspNet.Tx.Board.Services;
+using AspNet.Tx.Board.Telemetry;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -49,6 +50,18 @@ public sealed class TxBoardMiddleware
         {
             stopwatch.Stop();
 
+            var durationMs = stopwatch.ElapsedMilliseconds;
+            var status = ResolveStatus(context.Response.StatusCode, exception);
+
+            TxBoardTelemetry.RequestDuration.Record(
+                durationMs,
+                new TagList
+                {
+                    { "http.method", context.Request.Method },
+                    { "http.route", context.Request.Path.Value },
+                    { "http.status_code", context.Response.StatusCode }
+                });
+
             var record = new TxRecord
             {
                 Method = string.IsNullOrWhiteSpace(context.GetEndpoint()?.DisplayName)
@@ -58,8 +71,8 @@ public sealed class TxBoardMiddleware
                 Path = context.Request.Path.Value,
                 StartedAt = startedAt,
                 EndedAt = DateTimeOffset.UtcNow,
-                DurationMs = stopwatch.ElapsedMilliseconds,
-                Status = ResolveStatus(context.Response.StatusCode, exception),
+                DurationMs = durationMs,
+                Status = status,
                 ConnectionCount = 0,
                 ExecutedQueryCount = 0
             };
