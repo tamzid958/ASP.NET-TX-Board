@@ -113,18 +113,6 @@ Note: `Storage: Redis` currently falls back to in-memory storage with a warning 
 - `Details` mode:
   - Structured multi-line transaction/sql diagnostics
 
-## Demo
-
-A runnable demo is included at `demo/DotNetTxBoard.Demo`.
-
-```bash
-dotnet run --project demo/DotNetTxBoard.Demo
-```
-
-Then open:
-
-- `http://localhost:5000/tx-board/ui` (or your configured port)
-
 ## Maintainer
 
 Built and maintained by Tamzid.
