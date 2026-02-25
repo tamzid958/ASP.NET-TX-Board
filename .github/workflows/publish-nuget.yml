@@ -41,16 +41,10 @@ jobs:
           fi
 
       - name: Publish to NuGet
-        run: dotnet nuget push "./artifacts/*.nupkg" \
-          --api-key "$NUGET_API_KEY" \
-          --source "https://api.nuget.org/v3/index.json" \
-          --skip-duplicate
+        run: dotnet nuget push "./artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
 
       - name: Publish symbols to NuGet
-        run: dotnet nuget push "./artifacts/*.snupkg" \
-          --api-key "$NUGET_API_KEY" \
-          --source "https://api.nuget.org/v3/index.json" \
-          --skip-duplicate
+        run: dotnet nuget push "./artifacts/*.snupkg" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
