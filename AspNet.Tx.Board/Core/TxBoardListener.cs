@@ -4,6 +4,7 @@ using AspNet.Tx.Board.Enums;
 using AspNet.Tx.Board.Models;
 using AspNet.Tx.Board.Options;
 using AspNet.Tx.Board.Storage;
+using AspNet.Tx.Board.Telemetry;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -81,6 +82,14 @@ public sealed class TxBoardListener
 
         parent?.Children.Add(info);
         stack.Push(info);
+
+        // Start an OTel span for this transaction.
+        // ActivitySource.StartActivity returns null when no listener is subscribed — no overhead.
+        info.Activity = TxBoardTelemetry.ActivitySource.StartActivity(
+            "db.transaction", ActivityKind.Internal);
+        info.Activity?.SetTag("db.transaction.method", info.Method);
+        info.Activity?.SetTag("db.transaction.isolation_level", info.Isolation.ToString());
+        info.Activity?.SetTag("db.transaction.propagation", info.Propagation.ToString());
     }
 
     public void OnAfterCommit() => CompleteTransaction(TransactionStatus.Committed);
@@ -155,16 +164,22 @@ public sealed class TxBoardListener
             sqlInfo.ConReleaseTime = DateTimeOffset.UtcNow;
             var occupiedMs = (long)(sqlInfo.ConReleaseTime.Value - sqlInfo.ConAcquiredTime).TotalMilliseconds;
 
+            bool alarming = occupiedMs > _options.AlarmingThreshold.Connection;
+
             var log = new SqlExecutionLog
             {
                 Id = sqlInfo.Id,
                 ConAcquiredTime = sqlInfo.ConAcquiredTime,
                 ConReleaseTime = sqlInfo.ConReleaseTime.Value,
                 ConOccupiedTime = occupiedMs,
-                AlarmingConnection = occupiedMs > _options.AlarmingThreshold.Connection,
+                AlarmingConnection = alarming,
                 Thread = sqlInfo.Thread,
                 ExecutedQueries = [.. sqlInfo.Queries]
             };
+
+            TxBoardTelemetry.ConnectionDuration.Record(
+                occupiedMs,
+                new TagList { { "db.connection.alarming", alarming } });
 
             _sqlRepo.Save(log);
             LogSqlExecution(log);
@@ -228,8 +243,36 @@ public sealed class TxBoardListener
             Details = $"End {info.Method} ({status})"
         });
 
+        var durationMs = info.EndTime.HasValue
+            ? (long)(info.EndTime.Value - info.StartTime).TotalMilliseconds
+            : 0L;
+
+        // Finalise OTel span
+        if (info.Activity is { } activity)
+        {
+            activity.SetTag("db.transaction.status", status.ToString());
+            activity.SetTag("db.transaction.query_count", info.Queries.Count);
+            if (info.IsRoot)
+                activity.SetTag("db.transaction.alarming", durationMs > _options.AlarmingThreshold.Transaction);
+
+            activity.SetStatus(status == TransactionStatus.Errored
+                ? ActivityStatusCode.Error
+                : ActivityStatusCode.Ok);
+            activity.Stop();
+        }
+
+        // Record OTel metric (only for root transactions to avoid double-counting)
         if (info.IsRoot)
         {
+            TxBoardTelemetry.TransactionDuration.Record(
+                durationMs,
+                new TagList
+                {
+                    { "db.transaction.method", info.Method },
+                    { "db.transaction.status", status.ToString() },
+                    { "db.transaction.propagation", info.Propagation.ToString() }
+                });
+
             var log = BuildTransactionLog(info);
             _txRepo.Save(log);
             LogTransaction(log);
