@@ -2,21 +2,25 @@ name: Publish NuGet
 
 on:
   push:
-    branches:
-      - "master"
+    tags:
+      - "v*.*.*"
   workflow_dispatch:
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+
     permissions:
-      contents: read
+      contents: write
+
     env:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -37,7 +41,20 @@ jobs:
           fi
 
       - name: Publish to NuGet
-        run: dotnet nuget push "./artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+        run: dotnet nuget push "./artifacts/*.nupkg" \
+          --api-key "$NUGET_API_KEY" \
+          --source "https://api.nuget.org/v3/index.json" \
+          --skip-duplicate
 
       - name: Publish symbols to NuGet
-        run: dotnet nuget push "./artifacts/*.snupkg" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+        run: dotnet nuget push "./artifacts/*.snupkg" \
+          --api-key "$NUGET_API_KEY" \
+          --source "https://api.nuget.org/v3/index.json" \
+          --skip-duplicate
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./artifacts/*.nupkg
+            ./artifacts/*.snupkg
