@@ -64,6 +64,7 @@ builder.Services.AddDbContext<AppDbContext>((sp, options) =>
 {
   "TxBoard": {
     "Enabled": true,
+    "EnableTelemetry": false,
     "LogType": "Simple",
     "Storage": "InMemory",
     "AlarmingThreshold": {
@@ -83,6 +84,7 @@ builder.Services.AddDbContext<AppDbContext>((sp, options) =>
 | Key | Description | Default |
 | --- | --- | --- |
 | `Enabled` | Enables/disables Tx Board capture | `true` |
+| `EnableTelemetry` | Enables/disables trace and metric emission | `false` |
 | `LogType` | `Simple` or `Details` logging format | `Simple` |
 | `Storage` | `InMemory` or `Redis` | `InMemory` |
 | `AlarmingThreshold.Transaction` | Warn threshold for transaction duration (ms) | `1000` |
@@ -111,7 +113,8 @@ Note: `Storage: Redis` currently falls back to in-memory storage with a warning 
 
 ## OpenTelemetry
 
-Tx Board emits traces and metrics via the standard .NET `System.Diagnostics` APIs — **no extra NuGet packages** are required in the library itself.
+Tx Board can emit traces and metrics via the standard .NET `System.Diagnostics` APIs - **no extra NuGet packages** are required in the library itself.
+Telemetry is optional and disabled by default.
 
 ### Traces
 
@@ -136,7 +139,7 @@ A span named `db.transaction` is started for every database transaction and carr
 
 ### Setup
 
-Install your preferred OTel exporter (e.g. `OpenTelemetry.Exporter.Console`, `OpenTelemetry.Exporter.OpenTelemetryProtocol`) and register the Tx Board source/meter:
+Set `TxBoard:EnableTelemetry` to `true`, then install your preferred OTel exporter (e.g. `OpenTelemetry.Exporter.Console`, `OpenTelemetry.Exporter.OpenTelemetryProtocol`) and register the Tx Board source/meter:
 
 ```csharp
 builder.Services.AddOpenTelemetry()
@@ -148,7 +151,7 @@ builder.Services.AddOpenTelemetry()
         .AddConsoleExporter());
 ```
 
-When no OTel listener is registered, all instrumentation is a no-op with zero overhead.
+When `EnableTelemetry` is `false`, Tx Board does not emit spans/metrics. When it is `true` and no OTel listener is registered, instrumentation is a no-op.
 
 ## Logging
 
@@ -161,3 +164,4 @@ When no OTel listener is registered, all instrumentation is a no-op with zero ov
 ## Maintainer
 
 Built and maintained by Tamzid.
+

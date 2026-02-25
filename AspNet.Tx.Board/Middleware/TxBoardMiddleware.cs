@@ -53,14 +53,17 @@ public sealed class TxBoardMiddleware
             var durationMs = stopwatch.ElapsedMilliseconds;
             var status = ResolveStatus(context.Response.StatusCode, exception);
 
-            TxBoardTelemetry.RequestDuration.Record(
-                durationMs,
-                new TagList
-                {
-                    { "http.method", context.Request.Method },
-                    { "http.route", context.Request.Path.Value },
-                    { "http.status_code", context.Response.StatusCode }
-                });
+            if (currentOptions.EnableTelemetry)
+            {
+                TxBoardTelemetry.RequestDuration.Record(
+                    durationMs,
+                    new TagList
+                    {
+                        { "http.method", context.Request.Method },
+                        { "http.route", context.Request.Path.Value },
+                        { "http.status_code", context.Response.StatusCode }
+                    });
+            }
 
             var record = new TxRecord
             {

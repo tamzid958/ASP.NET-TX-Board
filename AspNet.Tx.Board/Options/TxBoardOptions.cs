@@ -15,6 +15,7 @@ public enum TxBoardStorageType
 public sealed class TxBoardOptions
 {
     public bool Enabled { get; set; } = true;
+    public bool EnableTelemetry { get; set; } = false;
 
     public TxBoardLogType LogType { get; set; } = TxBoardLogType.Simple;
 

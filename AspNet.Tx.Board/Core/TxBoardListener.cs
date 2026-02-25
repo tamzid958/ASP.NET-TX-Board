@@ -85,11 +85,14 @@ public sealed class TxBoardListener
 
         // Start an OTel span for this transaction.
         // ActivitySource.StartActivity returns null when no listener is subscribed — no overhead.
-        info.Activity = TxBoardTelemetry.ActivitySource.StartActivity(
-            "db.transaction", ActivityKind.Internal);
-        info.Activity?.SetTag("db.transaction.method", info.Method);
-        info.Activity?.SetTag("db.transaction.isolation_level", info.Isolation.ToString());
-        info.Activity?.SetTag("db.transaction.propagation", info.Propagation.ToString());
+        if (_options.EnableTelemetry)
+        {
+            info.Activity = TxBoardTelemetry.ActivitySource.StartActivity(
+                "db.transaction", ActivityKind.Internal);
+            info.Activity?.SetTag("db.transaction.method", info.Method);
+            info.Activity?.SetTag("db.transaction.isolation_level", info.Isolation.ToString());
+            info.Activity?.SetTag("db.transaction.propagation", info.Propagation.ToString());
+        }
     }
 
     public void OnAfterCommit() => CompleteTransaction(TransactionStatus.Committed);
@@ -177,9 +180,12 @@ public sealed class TxBoardListener
                 ExecutedQueries = [.. sqlInfo.Queries]
             };
 
-            TxBoardTelemetry.ConnectionDuration.Record(
-                occupiedMs,
-                new TagList { { "db.connection.alarming", alarming } });
+            if (_options.EnableTelemetry)
+            {
+                TxBoardTelemetry.ConnectionDuration.Record(
+                    occupiedMs,
+                    new TagList { { "db.connection.alarming", alarming } });
+            }
 
             _sqlRepo.Save(log);
             LogSqlExecution(log);
@@ -248,7 +254,7 @@ public sealed class TxBoardListener
             : 0L;
 
         // Finalise OTel span
-        if (info.Activity is { } activity)
+        if (_options.EnableTelemetry && info.Activity is { } activity)
         {
             activity.SetTag("db.transaction.status", status.ToString());
             activity.SetTag("db.transaction.query_count", info.Queries.Count);
@@ -264,14 +270,17 @@ public sealed class TxBoardListener
         // Record OTel metric (only for root transactions to avoid double-counting)
         if (info.IsRoot)
         {
-            TxBoardTelemetry.TransactionDuration.Record(
-                durationMs,
-                new TagList
-                {
-                    { "db.transaction.method", info.Method },
-                    { "db.transaction.status", status.ToString() },
-                    { "db.transaction.propagation", info.Propagation.ToString() }
-                });
+            if (_options.EnableTelemetry)
+            {
+                TxBoardTelemetry.TransactionDuration.Record(
+                    durationMs,
+                    new TagList
+                    {
+                        { "db.transaction.method", info.Method },
+                        { "db.transaction.status", status.ToString() },
+                        { "db.transaction.propagation", info.Propagation.ToString() }
+                    });
+            }
 
             var log = BuildTransactionLog(info);
             _txRepo.Save(log);
